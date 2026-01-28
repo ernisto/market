@@ -1,0 +1,11 @@
+-- these can be ignored if you are using the studio plugin
+option ClientOutput = 'dist/blink/client/init.luau'
+option ServerOutput = 'dist/blink/server/init.luau'
+option TypesOutput = 'dist/blink/types.luau'
+
+option PromiseLibrary = 'ReplicatedStorage.packages.promise'
+option WriteValidations = true
+option SyncValidation = true
+option Casing = Snake
+
+import 'remotes/init' as game

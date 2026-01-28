@@ -1,0 +1,38 @@
+name = "ernisto/game"
+version = "0.1.0"
+license = "MIT"
+repository = "https://github.com/ernisto/game"
+authors = ["ernisto <joaovitordesouza707@gmail.com>"]
+includes = ["pesde.toml", "README.md", "LICENSE", "docs/**/*.md"]
+
+[place]
+server = "game.ServerScriptService.packages"
+shared = "game.ReplicatedStorage.packages"
+
+[target]
+environment = "roblox"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+[scripts]
+roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
+sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
+
+[engines]
+pesde = "^0.7.1"
+lune = "^0.10.4"
+
+[dependencies]
+promise = { wally = "lukadev-0/typed-promise", version = "^4.0.2" }
+
+# server
+profile_store = { wally = "lm-loleris/profilestore", version = "^1.0.2" }
+
+# ci
+scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
+rojo = { name = "pesde/rojo", version = "^7.6.0", target = "lune" }
+vide = { wally = "centau/vide", version = "^0.4.0" }

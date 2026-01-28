@@ -1,0 +1,5 @@
+# [plugins.uilabs]
+# cloud = 14293316215
+
+# [plugins.editor_position]
+# local = "plugins/editor_position.lua"

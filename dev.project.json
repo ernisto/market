@@ -1,0 +1,33 @@
+{
+  "name": "game",
+  "emitLegacyScripts": false,
+  "tree": {
+    "$className": "DataModel",
+    
+    "ReplicatedStorage": {
+      "mantle_uploads": {
+        "$path": "dist/mantle/uploads.toml"
+      },
+      "types": {
+        "$path": "dist/blink/types.luau"
+      },
+      "packages": {
+        "$path": "roblox_packages"
+      },
+      "shared": {
+        "$path": "shared"
+      }
+    },
+    "ServerScriptService": {
+      "packages": {
+        "$path": "roblox_server_packages"
+      },
+      "server": {
+        "$path": "server",
+        "net": {
+          "$path": "dist/blink/server"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+owner:
+  group: 0
+
+environments:
+  - label: release
+    targetAccess: public
+    branches: [main]
+
+  - label: dev
+    targetAccess: private
+    branches: [next]
+    targetOverrides:
+      places:
+        start:
+          configuration:
+            name: Game [next]
+        match:
+          configuration:
+            name: Game [next]
+
+# state:
+#   remote:
+#     bucket: game-mantle-states # Bucket Name
+#     key: game # Prefix of .mantle-state.yml, tipically your project name
+#     region:
+#       custom:
+#         name: ENAM # Bucket Location
+#         endpoint: https://dc88f586de4d2c1eb08099d9e049613e.r2.cloudflarestorage.com # Bucket API S3
+
+target:
+  experience:
+    spatialVoice:
+      enabled: true
+
+    configuration:
+      genre: all
+
+      enableStudioAccessToApis: true
+      allowThirdPartyTeleports: false
+      allowThirdPartySales: false
+
+      avatarType: playerChoice
+      avatarAnimationType: playerChoice
+      avatarCollisionType: outerBox
+    places:
+      start:
+        file: dist/rojo/lobby.rbxl
+        configuration:
+          name: Game
+          serverFill: robloxOptimized
+          maxPlayerCount: 50
+          allowCopying: false
+      match:
+        file: dist/rojo/match.rbxl
+        configuration:
+          name: Game
+          serverFill: robloxOptimized
+          maxPlayerCount: 50
+          allowCopying: false
+
+    assets:
+      - assets/images/products/*.png
+
+    products:
+      vip:
+        name: VIP
+        icon: assets/images/products/vip.png
+        price: 499
+        description: |
+          5000 cash + 2x cash
+          discount: 29%
+          until: 01/07/25

@@ -1,0 +1,14 @@
+
+# blink / asphalt / rojo
+**/dist/**
+
+# pesde
+**/.pesde/**
+**/*_packages/**
+
+# roblox
+*.rbxl
+*.rbxl.lock
+
+# rojo
+sourcemap.json

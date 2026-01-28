@@ -1,0 +1,14 @@
+function prompt {
+    yield: Promise,
+    data: struct {
+        -- currency: enum { robux, wons },
+        product_id: u32,
+        target_id: u32?
+    }
+}
+
+event purchase_completed {
+    From: Server,
+    Type: Reliable,
+    Call: SingleSync,
+}

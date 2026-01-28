@@ -1,0 +1,158 @@
+redactions = ["*KEY*", "*TOKEN*", "*SECURITY*"]
+
+[env]
+_.file = ".env"
+
+[tools]
+"github:lune-org/lune" = "0.10.4" # pesde dependency :sob:
+"github:pesde-pkg/pesde" = "0.7.1+registry.0.2.3"
+"github:johnnymorganz/luau-lsp" = "1.60.0"
+"github:johnnymorganz/stylua" = "2.3.1"
+"github:jacktabscode/asphalt" = "1.1.0"
+"github:rojo-rbx/rojo" = "7.7.0-rc.1"
+"github:1Axen/blink" = "0.18.4"
+
+[tasks]
+"dev".run.tasks = ["dev:enable_plugins", "dev:ensure_opened", "dev:watch_stuffs", "dev:sync_code"]
+
+[tasks."dev:watch_stuffs"]
+tools = { watchexec = "latest" }
+run = "mise watch map ::: build:*:dev"
+
+# drillbit
+[tasks."dev:enable_plugins"]
+tools = { "github:jacktabscode/drillbit" = "0.1.5" }
+sources = ["plugins/*", "drillbit.toml"]
+run_windows = "drillbit"
+
+[tasks."dev:ensure_opened"]
+wait_for = ["dev:enable_plugins"]
+depends = ["build:dev"]
+shell = 'powershell'
+run_windows = "if (-not (Test-Path \"game.rbxl.lock\")) { start game.rbxl }"
+
+# mantle
+[tasks."upload"]
+tools = { "github:blake-mealey/mantle" = "0.11.18" }
+depends = ["build:universe", "lint"]
+run = "mantle upload"
+env = { MANTLE_OPEN_CLOUD_API_KEY = { required = true } }
+
+# products  TODO: migrate from mantle to a CLI to handle products
+[tasks."upload:products"]
+tools = { "github:blake-mealey/mantle" = "0.11.18" }
+sources = ["mantle.yml"]
+outputs = ".mantle-state.yml"
+run = "mantle upload"
+env = { MANTLE_OPEN_CLOUD_API_KEY = { required = true } }
+
+[tasks."build:products:universe"]
+tools = { "github:lune-org/lune" = "0.10.4" }
+sources = ["mantle.yml", ".mantle-state.yml"]
+outputs = "dist/mantle/uploads.toml"
+depends = ["upload:products"]
+run = "lune run scripts/uploads_gen.luau"
+
+[tasks."build:products:dev"]
+tools = { "github:lune-org/lune" = "0.10.4" }
+run = "lune run scripts/uploads_gen.luau"
+
+# luau
+[tasks.ensure_roblox_defs]
+sources = ["globalTypes.d.luau"]
+run = "curl -L \"https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/refs/heads/main/scripts/globalTypes.d.luau\" -o globalTypes.d.luau"
+
+[tasks.fmt]
+tools = { "github:johnnymorganz/stylua" = "2.3.0" }
+sources = ["**/*.luau"]
+run = "stylua ."
+
+[tasks."lint:dev"]
+depends = ["map", "ensure_roblox_defs"]
+sources = ["**/*.luau"]
+run.task = "lint"
+
+[tasks."lint"]
+tools = { "github:johnnymorganz/luau-lsp" = "1.60.0" }
+depends = ["ensure_roblox_defs"]
+wait_for = ["build:**"]
+run = """luau-lsp analyze \
+    --platform roblox \
+    --base-luaurc .luaurc \
+    --sourcemap sourcemap.json \
+    --ignore **/dist/** \
+    --ignore **/*_packages/** \
+    --defs globalTypes.d.luau \
+    ui client server shared stories"""
+
+# pesde
+[tasks."build:dependencies:universe"]
+tools = { "github:lune-org/lune" = "0.10.4" }
+sources = ["pesde.toml"]
+outputs = "pesde.lock"
+run = "pesde install --prod --locked"
+
+[tasks."build:dependencies:dev"]
+tools = { "github:lune-org/lune" = "0.10.4" }
+sources = ["pesde.toml"]
+outputs = "pesde.lock"
+run = "pesde install"
+
+[tasks."test"]
+tools = { "github:lune-org/lune" = "0.10.4" }
+sources = ["tests/**/*.luau"]
+run = "pesde x ernisto/test"
+
+# rojo
+[tasks."build:universe"]
+depends = ["build:*:universe", "fmt"]
+shell = "powershell"
+run = ["mise build:place match", "mise build:place lobby"]
+
+[tasks."build:place"]
+depends = ["build:*:universe", "fmt"]
+outputs = "dist/rojo/*.rbxl"
+shell = "powershell"
+usage = """
+    arg "<place>" help="The name used in places/*"
+"""
+run = """
+    mise build:remotes:place {$usage_place?}
+    rojo build places/${usage_place?}/game.project.json -o dist/rojo/{$usage_place?}.rbxl
+"""
+
+[tasks."build:dev"]
+depends = ["build:*:dev", "fmt"]
+outputs = "game.rbxl"
+run = "rojo build dev.project.json -o game.rbxl"
+
+[tasks."map"]
+depends = ["build:*:dev"]
+sources = ["**/*.project.json", "**/*.rbxm", "**/*.luau"]
+outputs = "sourcemap.json"
+run = "rojo sourcemap dev.project.json -o sourcemap.json --include-non-scripts"
+
+[tasks."dev:sync_code"]
+wait_for = ["build:*:dev", "fmt"]
+run = [
+    "rojo plugin install",
+    "rojo serve dev.project.json"
+]
+
+# blink
+[tasks."build:remotes:place"]
+tools = { "github:1Axen/blink" = "0.18.4" }
+sources = ["remotes/**/*.blink", "places/*/remotes/**/*.blink"]
+outputs = "dist/blink/types.luau"
+shell = "powershell"
+usage = """
+    arg "<place>" help="The name used in places/*"
+"""
+run = "blink places/${usage_place?}/game --yes"
+run_windows = """blink "places/$env:usage_place/game" --yes"""
+
+[tasks."build:remotes:dev"]
+tools = { "github:1Axen/blink" = "0.18.4" }
+sources = ["remotes/**/*.blink", "places/*/remotes/**/*.blink"]
+outputs = "dist/blink/types.luau"
+run = "blink dev --yes"
